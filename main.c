@@ -1,41 +1,41 @@
-#include <stdio.h>
+ï»¿#include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
 #include <pthread.h>
 #include <semaphore.h>
 #include <signal.h>
 
-//TODO £ºwindowsÏµÍ³ÓÃÕâ¸öº¯Êı sleep(2) ->> Sleep(2000)
+//TODO ï¼šwindowsç³»ç»Ÿç”¨è¿™ä¸ªå‡½æ•° sleep(2) ->> Sleep(2000)
 //#include <windows.h>
 
-#define N_product 5   // Éú²úÕßµÄÊıÄ¿
-#define N_prochase 5   // Ïû·ÑÕßµÄÊıÄ¿
-#define sleep_product 2 //Éú²úÕßË¯ÃßÊ±¼ä
-#define sleep_prochase 5 //Ïû·ÑÕßË¯ÃßÊ±¼ä
-#define M 50 // »º³åÊıÄ¿
-int in = 0; // Éú²úÕß·ÅÖÃ²úÆ·µÄÎ»ÖÃ
-int out = 0; // Ïû·ÑÕßÈ¡²úÆ·µÄÎ»ÖÃ
+#define N_product 5   // ç”Ÿäº§è€…çš„æ•°ç›®
+#define N_prochase 5   // æ¶ˆè´¹è€…çš„æ•°ç›®
+#define sleep_product 2 //ç”Ÿäº§è€…ç¡çœ æ—¶é—´
+#define sleep_prochase 5 //æ¶ˆè´¹è€…ç¡çœ æ—¶é—´
+#define M 50 // ç¼“å†²æ•°ç›®
+int in = 0; // ç”Ÿäº§è€…æ”¾ç½®äº§å“çš„ä½ç½®
+int out = 0; // æ¶ˆè´¹è€…å–äº§å“çš„ä½ç½®
 
-int buff[M] = { 0 }; // »º³å³õÊ¼»¯Îª0£¬¿ªÊ¼Ê±Ã»ÓĞ²úÆ·
+int buff[M] = { 0 }; // ç¼“å†²åˆå§‹åŒ–ä¸º0ï¼Œå¼€å§‹æ—¶æ²¡æœ‰äº§å“
 
 
-sem_t empty_sem; // Í¬²½ĞÅºÅÁ¿£¬µ±ÂúÁËÊ±×èÖ¹Éú²úÕß·Å²úÆ·
-sem_t full_sem; // Í¬²½ĞÅºÅÁ¿£¬µ±Ã»²úÆ·Ê±×èÖ¹Ïû·ÑÕßÏû·Ñ
+sem_t empty_sem; // åŒæ­¥ä¿¡å·é‡ï¼Œå½“æ»¡äº†æ—¶é˜»æ­¢ç”Ÿäº§è€…æ”¾äº§å“
+sem_t full_sem; // åŒæ­¥ä¿¡å·é‡ï¼Œå½“æ²¡äº§å“æ—¶é˜»æ­¢æ¶ˆè´¹è€…æ¶ˆè´¹
 
-pthread_mutex_t mutex_product; // »¥³âĞÅºÅÁ¿£¬Ò»´ÎÖ»ÓĞÒ»¸öÏß³Ì·ÃÎÊ»º³å
-pthread_mutex_t mutex_prochase; // »¥³âĞÅºÅÁ¿£¬Ò»´ÎÖ»ÓĞÒ»¸öÏß³Ì·ÃÎÊ»º³å
+pthread_mutex_t mutex_product; // äº’æ–¥ä¿¡å·é‡ï¼Œä¸€æ¬¡åªæœ‰ä¸€ä¸ªçº¿ç¨‹è®¿é—®ç¼“å†²
+pthread_mutex_t mutex_prochase; // äº’æ–¥ä¿¡å·é‡ï¼Œä¸€æ¬¡åªæœ‰ä¸€ä¸ªçº¿ç¨‹è®¿é—®ç¼“å†²
 
-int product_id = 0; //Éú²úÕßid
-int prochase_id = 0; //Ïû·ÑÕßid
-//ĞÅºÅ´¦Àíº¯Êı
+int product_id = 0; //ç”Ÿäº§è€…id
+int prochase_id = 0; //æ¶ˆè´¹è€…id
+//ä¿¡å·å¤„ç†å‡½æ•°
 void Handlesignal(int signo){
-    printf("³ÌĞòÍË³ö\n",signo);
+    printf("ç¨‹åºé€€å‡º\n",signo);
     exit(0);
 }
-/* ´òÓ¡»º³åÇé¿ö */
+/* æ‰“å°ç¼“å†²æƒ…å†µ */
 void print() {
     int i;
-    printf("²úÆ·¶ÓÁĞÎª");
+    printf("äº§å“é˜Ÿåˆ—ä¸º");
     char temp[M+1];
     for(i = 0; i < M; i++)
         if(buff[i]){
@@ -48,18 +48,18 @@ void print() {
     fflush(stdout);
 }
 
-/* Éú²úÕß·½·¨ */
+/* ç”Ÿäº§è€…æ–¹æ³• */
 void *product() {
     int id = ++product_id;
-    while(1) {//ÖØ¸´½øĞĞ
-        //ÓÃsleepµÄÊıÁ¿¿ÉÒÔµ÷½ÚÉú²úºÍÏû·ÑµÄËÙ¶È£¬±ãÓÚ¹Û²ì
+    while(1) {//é‡å¤è¿›è¡Œ
+        //ç”¨sleepçš„æ•°é‡å¯ä»¥è°ƒèŠ‚ç”Ÿäº§å’Œæ¶ˆè´¹çš„é€Ÿåº¦ï¼Œä¾¿äºè§‚å¯Ÿ
         sleep(sleep_product);
 
         sem_wait(&empty_sem);
         pthread_mutex_lock(&mutex_product);
 
         in= in % M;
-        printf(" + Éú²úÕß%dÔÚ²úÆ·¶ÓÁĞÖĞ·ÅÈëµÚ%d¸ö²úÆ·\t",id, in);
+        printf(" + ç”Ÿäº§è€…%dåœ¨äº§å“é˜Ÿåˆ—ä¸­æ”¾å…¥ç¬¬%dä¸ªäº§å“\t",id, in);
         fflush(stdout);
 
         buff[in]= 1;
@@ -71,18 +71,18 @@ void *product() {
     }
 }
 
-/* Ïû·ÑÕß·½·¨ */
+/* æ¶ˆè´¹è€…æ–¹æ³• */
 void *prochase() {
     int id = ++prochase_id;
-    while(1) {//ÖØ¸´½øĞĞ
-        //ÓÃsleepµÄÊıÁ¿¿ÉÒÔµ÷½ÚÉú²úºÍÏû·ÑµÄËÙ¶È£¬±ãÓÚ¹Û²ì
+    while(1) {//é‡å¤è¿›è¡Œ
+        //ç”¨sleepçš„æ•°é‡å¯ä»¥è°ƒèŠ‚ç”Ÿäº§å’Œæ¶ˆè´¹çš„é€Ÿåº¦ï¼Œä¾¿äºè§‚å¯Ÿ
         sleep(sleep_prochase);
 
         sem_wait(&full_sem);
         pthread_mutex_lock(&mutex_prochase);
 
         out= out % M;
-        printf(" - Ïû·ÑÕß%d´Ó²úÆ·¶ÓÁĞÖĞÈ¡³öµÚ%d¸ö²úÆ·\t",id, out);
+        printf(" - æ¶ˆè´¹è€…%dä»äº§å“é˜Ÿåˆ—ä¸­å–å‡ºç¬¬%dä¸ªäº§å“\t",id, out);
         fflush(stdout);
 
         buff[out]= 0;
@@ -95,49 +95,49 @@ void *prochase() {
 }
 
 int main() {
-    printf("Éú²úÕß%d¸öºÍÏû·ÑÕß%d¸ö,"
-            "²úÆ·»º³åÎª%d,Éú²úÕßÃ¿%dÃëÉú²úÒ»¸ö²úÆ·£¬"
-            "Ïû·ÑÕßÃ¿%dÃëÏû·ÑÒ»¸ö²úÆ·,Ctrl+ÍË³ö³ÌĞò\n",
+    printf("ç”Ÿäº§è€…%dä¸ªå’Œæ¶ˆè´¹è€…%dä¸ª,"
+            "äº§å“ç¼“å†²ä¸º%d,ç”Ÿäº§è€…æ¯%dç§’ç”Ÿäº§ä¸€ä¸ªäº§å“ï¼Œ"
+            "æ¶ˆè´¹è€…æ¯%dç§’æ¶ˆè´¹ä¸€ä¸ªäº§å“,Ctrl+é€€å‡ºç¨‹åº\n",
              N_product,N_prochase,M,sleep_product,sleep_prochase);
     pthread_t id1[N_prochase];
     pthread_t id2[N_product];
     int i;
     int ret[N_prochase+N_product];
-    //½áÊø³ÌĞò
-    if(signal(SIGINT,Handlesignal)==SIG_ERR){//°´ctrl+C²úÉúSIGINTĞÅºÅ
-        printf("ĞÅºÅ°²×°³ö´í\n");
+    //ç»“æŸç¨‹åº
+    if(signal(SIGINT,Handlesignal)==SIG_ERR){//æŒ‰ctrl+Cäº§ç”ŸSIGINTä¿¡å·
+        printf("ä¿¡å·å®‰è£…å‡ºé”™\n");
     }
-//TODO: ³õÊ¼»¯Í¬²½ĞÅºÅÁ¿
-    int ini1 = sem_init(&empty_sem, 0, M);//²úÆ·¶ÓÁĞ»º³åÍ¬²½
-    int ini2 = sem_init(&full_sem, 0, 0);//Ïß³ÌÔËĞĞÍ¬²½
+//TODO: åˆå§‹åŒ–åŒæ­¥ä¿¡å·é‡
+    int ini1 = sem_init(&empty_sem, 0, M);//äº§å“é˜Ÿåˆ—ç¼“å†²åŒæ­¥
+    int ini2 = sem_init(&full_sem, 0, 0);//çº¿ç¨‹è¿è¡ŒåŒæ­¥
     if(ini1 && ini2 != 0) {
-        printf("ĞÅºÅÁ¿³õÊ¼»¯Ê§°Ü£¡\n");
+        printf("ä¿¡å·é‡åˆå§‹åŒ–å¤±è´¥ï¼\n");
         exit(1);
     }
-//TODO: ³õÊ¼»¯»¥³âĞÅºÅÁ¿
+//TODO: åˆå§‹åŒ–äº’æ–¥ä¿¡å·é‡
     int ini3 = pthread_mutex_init(&mutex_product, NULL);
     int ini4 = pthread_mutex_init(&mutex_prochase, NULL);
     if(ini3 != 0 ||ini4!=0) {
-        printf("Ïß³ÌÍ¬²½³õÊ¼»¯Ê§°Ü£¡\n");
+        printf("çº¿ç¨‹åŒæ­¥åˆå§‹åŒ–å¤±è´¥ï¼\n");
         exit(1);
     }
-//TODO: ´´½¨N¸öÉú²úÕßÏß³Ì
+//TODO: åˆ›å»ºNä¸ªç”Ÿäº§è€…çº¿ç¨‹
     for(i = 0; i < N_product; i++) {
         ret[i]= pthread_create(&id1[i], NULL, product, (void *) (&i));
         if(ret[i] != 0) {
-            printf("Éú²úÕß%dÏß³Ì´´½¨Ê§°Ü£¡\n", i);
+            printf("ç”Ÿäº§è€…%dçº¿ç¨‹åˆ›å»ºå¤±è´¥ï¼\n", i);
             exit(1);
         }
     }
-//TODO: ´´½¨N¸öÏû·ÑÕßÏß³Ì
+//TODO: åˆ›å»ºNä¸ªæ¶ˆè´¹è€…çº¿ç¨‹
     for(i = 0; i < N_prochase; i++) {
         ret[i]= pthread_create(&id2[i], NULL, prochase, NULL);
         if(ret[i] != 0) {
-            printf("Ïû·ÑÕß%dÏß³Ì´´½¨Ê§°Ü£¡\n", i);
+            printf("æ¶ˆè´¹è€…%dçº¿ç¨‹åˆ›å»ºå¤±è´¥ï¼\n", i);
             exit(1);
         }
     }
-//TODO: µÈ´ıÏß³ÌÏú»Ù
+//TODO: ç­‰å¾…çº¿ç¨‹é”€æ¯
     for(i = 0; i < N_product; i++) {
         pthread_join(id1[i], NULL);
         pthread_join(id2[i],NULL);
