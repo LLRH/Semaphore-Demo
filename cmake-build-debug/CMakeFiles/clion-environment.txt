@@ -1,2 +1,0 @@
-ToolSet: 3.20@C:\Program Files (x86)\CodeBlocks\MinGW
-CMake: 3.6.3@D:\Program Files (x86)\JetBrains\CLion 2016.3.3\bin\cmake\bin\cmake.exe

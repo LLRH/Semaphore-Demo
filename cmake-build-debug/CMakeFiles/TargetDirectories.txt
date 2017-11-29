@@ -1,3 +1,0 @@
-C:/Users/wenxingbeng/CLionProjects/Study/cmake-build-debug/CMakeFiles/Study.dir
-C:/Users/wenxingbeng/CLionProjects/Study/cmake-build-debug/CMakeFiles/edit_cache.dir
-C:/Users/wenxingbeng/CLionProjects/Study/cmake-build-debug/CMakeFiles/rebuild_cache.dir

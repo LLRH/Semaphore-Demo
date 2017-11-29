@@ -29,7 +29,7 @@ int product_id = 0; //生产者id
 int prochase_id = 0; //消费者id
 //信号处理函数
 void Handlesignal(int signo){
-    printf("程序退出\n",signo);
+    printf("程序退出 %d\n",signo);
     exit(0);
 }
 /* 打印缓冲情况 */
