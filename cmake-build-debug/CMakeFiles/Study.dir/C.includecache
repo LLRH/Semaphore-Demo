@@ -9,6 +9,16 @@
 C:/Users/wenxingbeng/CLionProjects/Study/main.c
 stdio.h
 -
+stdlib.h
+-
+unistd.h
+-
 pthread.h
+-
+semaphore.h
+-
+signal.h
+-
+windows.h
 -
 
